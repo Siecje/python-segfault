@@ -8,8 +8,10 @@ import pytest
 
 
 def copy_file(source: Path, destination: Path) -> None:
-    if destination.exists() is False:
+    try:
         shutil.copyfile(source, destination)
+    except FileExistsError:
+        pass
 
 
 def initialize_site(tmp_dir) -> None:
