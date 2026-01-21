@@ -22,14 +22,10 @@ Fatal Python error: Segmentation fault
 Stack (most recent call first):
   File "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/python3.14t/shutil.py", line 109 in _fastcopy_fcopyfile
   File "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/python3.14t/shutil.py", line 319 in copyfile
-  File "/Users/cody.scott/code/segfault/tests/utils.py", line 33 in copy_file
-  File "/Users/cody.scott/code/segfault/tests/utils.py", line 49 in copy_site_file
-  File "/Users/cody.scott/code/segfault/tests/start.py", line 11 in start
-  File "/Users/cody.scott/code/segfault/venv/lib/python3.14t/site-packages/click/core.py", line 824 in invoke
-  File "/Users/cody.scott/code/segfault/venv/lib/python3.14t/site-packages/click/core.py", line 1269 in invoke
-  File "/Users/cody.scott/code/segfault/venv/lib/python3.14t/site-packages/click/core.py", line 1406 in main
-  File "/Users/cody.scott/code/segfault/venv/lib/python3.14t/site-packages/click/testing.py", line 504 in invoke
-  File "/Users/cody.scott/code/segfault/tests/conftest.py", line 12 in run_start
+  File "/Users/cody.scott/code/segfault/tests/conftest.py", line 12 in copy_file
+  File "/Users/cody.scott/code/segfault/tests/conftest.py", line 21 in copy_site_file
+  File "/Users/cody.scott/code/segfault/tests/conftest.py", line 28 in initialize_site
+  File "/Users/cody.scott/code/segfault/tests/conftest.py", line 35 in run_start
   File "/Users/cody.scott/code/segfault/venv/lib/python3.14t/site-packages/_pytest/fixtures.py", line 908 in call_fixture_func
   File "/Users/cody.scott/code/segfault/venv/lib/python3.14t/site-packages/_pytest/fixtures.py", line 1202 in pytest_fixture_setup
   File "/Users/cody.scott/code/segfault/venv/lib/python3.14t/site-packages/pluggy/_callers.py", line 121 in _multicall
@@ -41,7 +37,7 @@ Stack (most recent call first):
   File "/Users/cody.scott/code/segfault/venv/lib/python3.14t/site-packages/_pytest/fixtures.py", line 707 in _fillfixtures
   File "/Users/cody.scott/code/segfault/venv/lib/python3.14t/site-packages/_pytest/python.py", line 1723 in setup
   File "/Users/cody.scott/code/segfault/venv/lib/python3.14t/site-packages/_pytest/runner.py", line 523 in setup
-  File "/Users/cody.scott/code/segfault/venv/lib/python3.14t/site-packages/_pytest/runner.py", line 165 in pytest_runtest_setup
+  File "/Users/cody.scott/code/segfault/venv/lib/python3.14t/site-packages/_pytest/runner.py.", line 165 in pytest_runtest_setup
   File "/Users/cody.scott/code/segfault/venv/lib/python3.14t/site-packages/pluggy/_callers.py", line 121 in _multicall
   File "/Users/cody.scott/code/segfault/venv/lib/python3.14t/site-packages/pluggy/_manager.py", line 120 in _hookexec
   File "/Users/cody.scott/code/segfault/venv/lib/python3.14t/site-packages/pluggy/_hooks.py", line 512 in __call__
@@ -75,42 +71,42 @@ Stack (most recent call first):
   File "<string>", line 1 in <module>
 
 Current thread's C stack trace (most recent call first):
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _Py_DumpStack+0x44 [0x100f28a6c]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at faulthandler_fatal_error+0x240 [0x100f3c8dc]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _Py_DumpStack+0x44 [0x105234a6c]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at faulthandler_fatal_error+0x240 [0x1052488dc]
   Binary file "/usr/lib/system/libsystem_platform.dylib", at _sigtramp+0x38 [0x1916fd6a4]
   Binary file "/usr/lib/system/libsystem_c.dylib", at filesec_free+0x18 [0x191561f18]
   Binary file "/usr/lib/system/libcopyfile.dylib", at copyfile_state_alloc+0x38 [0x19f8f6b38]
   Binary file "/usr/lib/system/libcopyfile.dylib", at copyfile_preamble+0x2c [0x19f8f69ec]
   Binary file "/usr/lib/system/libcopyfile.dylib", at fcopyfile+0x48 [0x19f8f8fd0]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at os__fcopyfile+0x90 [0x100f424e0]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_EvalFrameDefault+0x352c [0x100e854bc]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_Vector+0x2cc [0x100e81ce8]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at method_vectorcall+0x1bc [0x100d35424]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_EvalFrameDefault+0x3e40 [0x100e85dd0]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_Vector+0x2cc [0x100e81ce8]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at method_vectorcall+0xb4 [0x100d3531c]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_Call+0x7c [0x100d320e8]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_EvalFrameDefault+0x3e40 [0x100e85dd0]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at gen_send_ex2+0x260 [0x100d5508c]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at gen_iternext+0x24 [0x100d536e8]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at builtin_next+0x64 [0x100e7e130]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_EvalFrameDefault+0x352c [0x100e854bc]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_Vector+0x2cc [0x100e81ce8]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_VectorcallDictTstate+0x7c [0x100d31610]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_Call_Prepend+0x98 [0x100d32894]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at call_method+0x7c [0x100de428c]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_MakeTpCall+0x148 [0x100d3180c]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_EvalFrameDefault+0x4f7c [0x100e86f0c]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_Vector+0x2cc [0x100e81ce8]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_VectorcallDictTstate+0x7c [0x100d31610]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_Call_Prepend+0x98 [0x100d32894]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at call_method+0x7c [0x100de428c]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_Call+0x118 [0x100d32184]
-  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_EvalFrameDefault+0x3e40 [0x100e85dd0]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at os__fcopyfile+0x90 [0x10524e4e0]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_EvalFrameDefault+0x352c [0x1051914bc]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at gen_send_ex2+0x260 [0x10506108c]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at gen_iternext+0x24 [0x10505f6e8]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at builtin_next+0x64 [0x10518a130]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_EvalFrameDefault+0x352c [0x1051914bc]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_Vector+0x2cc [0x10518dce8]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_VectorcallDictTstate+0x7c [0x10503d610]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_Call_Prepend+0x98 [0x10503e894]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at call_method+0x7c [0x1050f028c]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_MakeTpCall+0x148 [0x10503d80c]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_EvalFrameDefault+0x4f7c [0x105192f0c]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_Vector+0x2cc [0x10518dce8]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_VectorcallDictTstate+0x7c [0x10503d610]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_Call_Prepend+0x98 [0x10503e894]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at call_method+0x7c [0x1050f028c]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_Call+0x118 [0x10503e184]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_EvalFrameDefault+0x3e40 [0x105191dd0]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_Vector+0x2cc [0x10518dce8]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_VectorcallDictTstate+0x7c [0x10503d610]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_Call_Prepend+0x98 [0x10503e894]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at call_method+0x7c [0x1050f028c]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyObject_MakeTpCall+0x148 [0x10503d80c]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_EvalFrameDefault+0x4f7c [0x105192f0c]
+  Binary file "/Users/cody.scott/.pyenv/versions/3.14.2t/lib/libpython3.14t.dylib", at _PyEval_Vector+0x2cc [0x10518dce8]
   <truncated rest of calls>
 
-Extension modules: markupsafe._speedups, yaml._yaml, _watchdog_fsevents (total: 3)
-[gw11] node down: Not properly terminated
+Extension modules: markupsafe._speedups, _watchdog_fsevents (total: 2)
+[gw10] node down: Not properly terminated
 F
-replacing crashed worker gw11
+replacing crashed worker gw10
 ```
