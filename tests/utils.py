@@ -1,6 +1,5 @@
 import datetime
 import hashlib
-from importlib.resources import as_file, files
 import os
 from pathlib import Path
 import shutil
@@ -16,18 +15,6 @@ from flask_flatpages import FlatPages, Page
 from jsmin import jsmin
 
 
-def create_directory(name: str) -> Path:
-    directory = Path(name)
-    try:
-        directory.mkdir()
-    except FileExistsError:
-        msg = f'{name} already exists and was not created.'
-        click.echo(click.style(msg, fg='yellow'))
-    else:
-        click.echo(click.style(f'{name} was created.', fg='green'))
-    return directory
-
-
 def copy_file(source: Path, destination: Path) -> None:
     if destination.exists() is False:
         shutil.copyfile(source, destination)
@@ -35,18 +22,6 @@ def copy_file(source: Path, destination: Path) -> None:
     else:
         msg = f'{destination} already exists and was not created.'
         click.echo(click.style(msg, fg='yellow'))
-
-
-def copy_site_file(directory: Path, filename: str) -> None:
-    if directory.name == '':
-        anchor = 'htmd.example_site'
-    else:
-        anchor = f'htmd.example_site.{directory}'
-    source_path = files(anchor) / filename
-    destination_path = directory / filename
-
-    with as_file(source_path) as file:
-        copy_file(file, destination_path)
 
 
 def create_app():
