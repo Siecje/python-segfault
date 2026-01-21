@@ -1,11 +1,15 @@
 from importlib.resources import as_file, files
 from collections.abc import Generator
 from pathlib import Path
+import shutil
 
 from click.testing import CliRunner
 import pytest
 
-from utils import copy_file
+
+def copy_file(source: Path, destination: Path) -> None:
+    if destination.exists() is False:
+        shutil.copyfile(source, destination)
 
 
 def copy_site_file(directory: Path, filename: str) -> None:

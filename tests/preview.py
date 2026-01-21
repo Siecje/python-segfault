@@ -11,13 +11,10 @@ from watchdog.events import (
     FileSystemEventHandler,
 )
 from watchdog.observers import Observer
-from werkzeug.serving import BaseWSGIServer, make_server
+from werkzeug.serving import make_server
 
 from utils import (
     create_app,
-    reload_posts,
-    sync_posts,
-    validate_post,
 )
 
 
@@ -53,13 +50,6 @@ class PostsCreatedHandler(FileSystemEventHandler):
         if self._seen_mtimes.get(file_path) == new_mtime:
             return
 
-        with self.app.app_context():
-            reload_posts(self.app)
-        sync_posts(self.app)
-        posts = self.app.extensions['flatpages'][None]
-        for post in posts.pages.values():
-            validate_post(post, [])
-
         self._seen_mtimes[file_path] = new_mtime
         self.event.set()
         action = 'created' if is_new_post else 'updated'
@@ -82,10 +72,6 @@ def watch_disk(app, static_folder, posts_path, exit_event, refresh_event):
             recursive=True,
         )
         observer.start()
-        
-        with app.app_context():
-            reload_posts(app)
-        sync_posts(app)
 
         while not exit_event.is_set():
             observer.join(timeout=0.1)
@@ -108,7 +94,6 @@ def run_preview(host: str, port: int) -> None:
     """The core logic previously inside the @click.command."""
     app = create_app()
 
-    sync_posts(app)
     stop_event = create_stop_event()
     set_stop_event_on_signal(stop_event)
 
@@ -154,6 +139,7 @@ def run_preview(host: str, port: int) -> None:
         webserver.shutdown()
         stop_event.set()
         print('Preview stopped.')
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Serve files to preview site.')

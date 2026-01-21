@@ -2,24 +2,13 @@ import datetime
 import hashlib
 import os
 from pathlib import Path
-import shutil
 import tempfile
-import time
 import uuid
 
 
 import click
 from flask import Flask
 from flask_flatpages import FlatPages, Page
-
-
-def copy_file(source: Path, destination: Path) -> None:
-    if destination.exists() is False:
-        shutil.copyfile(source, destination)
-        click.echo(click.style(f'{destination} was created.', fg='green'))
-    else:
-        msg = f'{destination} already exists and was not created.'
-        click.echo(click.style(msg, fg='yellow'))
 
 
 def create_app():
@@ -49,9 +38,6 @@ def create_app():
         return "Hello, World!"
 
     posts.init_app(app)
-    # populate publish_posts
-    with app.app_context():
-        reload_posts(app)
     return app
 
 def format_yaml_value(value: str) -> str:
@@ -100,56 +86,6 @@ def atomic_write(path: Path, content: str) -> None:
 
 def send_stderr(message: str) -> None:
     click.echo(click.style(message, fg='red'), err=True)
-
-
-def validate_post(post: Page, required_fields: list[str]) -> bool: # noqa: C901
-    correct = True
-    for field in required_fields:
-        if field not in post.meta:
-            correct = False
-            msg = f'Post "{post.path}" does not have field {field}.'
-            send_stderr(msg)
-    if 'published' in post.meta:
-        published = post.meta.get('published')
-        if not hasattr(published, 'year'):
-            correct = False
-            msg = (
-                f'Published date {published} for {post.path}'
-                ' is not in the format YYYY-MM-DD.'
-            )
-            send_stderr(msg)
-    if 'updated' in post.meta:
-        updated = post.meta.get('updated')
-        if not hasattr(updated, 'year'):
-            correct = False
-            msg = (
-                f'Updated date {updated} for {post.path}'
-                ' is not in the format YYYY-MM-DD.'
-            )
-            send_stderr(msg)
-    if 'draft' in post.meta:
-        draft = post.meta['draft']
-        if draft in [True, False, 'build']:
-            pass
-        elif 'build|' in draft:
-            draft_id = draft.split('|')[1]
-            if not valid_uuid(draft_id):
-                correct = False
-                msg = (
-                    f'Draft field {draft} for {post.path}'
-                    ' has an invalid UUID4.'
-                )
-                send_stderr(msg)
-        else:
-            correct = False
-            msg = (
-                f'Draft field {draft} for {post.path}'
-                ' is not valid. It must be True, False,'
-                ' "build", or "build|<UUID4>".'
-            )
-            send_stderr(msg)
-
-    return correct
 
 
 def _get_published(
@@ -242,107 +178,3 @@ def set_post_metadata(
         i += 1
 
     atomic_write(file_path, ''.join(new_lines))
-
-
-def sync_posts(
-    app: Flask,
-) -> None:
-    """
-    Sync draft, published, updated, and _hash for each post.
-
-    Ensure each draft build post has a uuid.
-    Don't change published, updated, or _hash for drafts.
-
-    Ensure each non draft post has published:
-    If published is missing set to current datetime
-    Atom feed needs a datetime
-    so if published is date, convert to datetime
-    if published is already datetime
-    set updated field to current datetime
-
-    If updated is a date, convert to datetime.
-
-    Set hash using title and post contents.
-    """
-    now = datetime.datetime.now(tz=datetime.UTC)
-    _posts = app.extensions['flatpages'][None]
-    with app.app_context():
-        for post in _posts.pages.values():
-            file_updates: dict[str, str] = {}
-
-            if post.meta.get('draft', False):
-                if (
-                    'build' in str(post.meta['draft'])
-                    and not valid_uuid(post.meta['draft'].replace('build|', ''))
-                ):
-                    post.meta['draft'] = 'build|' + str(uuid.uuid4())
-                    file_updates['draft'] = post.meta['draft']
-                    set_post_metadata(
-                        app,
-                        post,
-                        file_updates,
-                    )
-                continue
-
-            current_published = post.meta.get('published')
-            current_updated = post.meta.get('updated')
-            current_hash = post.meta.get('_hash', '')
-            published = _get_published(
-                current_published,
-                current_updated,
-                now,
-            )
-
-            post_hash = _get_post_hash(
-                post.meta.get('title') or '',
-                post.html,
-            )
-
-            hash_changed = current_hash != post_hash
-
-            if hash_changed:
-                post.meta['_hash'] = post_hash
-                file_updates['_hash'] = post.meta['_hash']
-            if published != current_published:
-                post.meta['published'] = published
-                file_updates['published'] = published.isoformat()
-            post_already_published = (
-                isinstance(current_published, datetime.datetime)
-                or isinstance(current_updated, datetime.datetime)
-            )
-            if hash_changed and post_already_published:
-                post.meta['updated'] = now
-                file_updates['updated'] = now.isoformat()
-            elif (
-                not isinstance(current_updated, datetime.datetime)
-                and isinstance(current_updated, datetime.date)
-            ):
-                updated = datetime.datetime.combine(
-                    current_updated,
-                    datetime.time.min,
-                    tzinfo=datetime.UTC,
-                )
-                post.meta['updated'] = updated
-                file_updates['updated'] = updated.isoformat()
-
-            if file_updates:
-                set_post_metadata(
-                    app,
-                    post,
-                    file_updates,
-                )
-
-
-def reload_posts(app: Flask, *, show_drafts: bool | None = None) -> None:
-    _posts = app.extensions['flatpages'][None]
-    time.sleep(0.01)
-    _posts.reload()
-    target_show_drafts = show_drafts if show_drafts is not None else _posts.show_drafts
-
-    new_published_posts = [
-        p for p in _posts.pages.values()
-        if 'published' in p.meta and hasattr(p.meta['published'], 'year')
-        and (target_show_drafts or not p.meta.get('draft', False))
-    ]
-    _posts.published_posts = new_published_posts
-    _posts.show_drafts = target_show_drafts
