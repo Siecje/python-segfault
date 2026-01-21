@@ -6,7 +6,7 @@
 ~/.pyenv/versions/3.14.2t/bin/python -m venv venv
 venv/bin/python -m pip install pip setuptools --upgrade
 venv/bin/python -m pip install pytest Flask
-venv/bin/python -m pip install --force-reinstall git+https://github.com/gorakhargosh/watchdog.git@refs/pull/1109/head
+venv/bin/python -m pip install git+https://github.com/gorakhargosh/watchdog.git@refs/pull/1109/head
 venv/bin/python -m pip install pytest-repeat pytest-xdist
 ```
 
