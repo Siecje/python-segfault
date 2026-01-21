@@ -15,13 +15,6 @@ def create_stop_event() -> threading.Event:
     return threading.Event()
 
 
-def set_stop_event_on_signal(stop_event: threading.Event) -> None:
-    def handle_signal(_signum: int, _frame: types.FrameType | None) -> None:
-        stop_event.set()
-    signal.signal(signal.SIGTERM, handle_signal)
-    signal.signal(signal.SIGINT, handle_signal)
-
-
 class PostsCreatedHandler(FileSystemEventHandler):
     def handle_event(self, file_path: str | bytes) -> None:
         pass
@@ -61,7 +54,6 @@ def create_webserver(host, port):
 
 def run_preview(host: str, port: int) -> None:
     stop_event = create_stop_event()
-    set_stop_event_on_signal(stop_event)
     
     # Ensure directory exists before watching
     Path('posts').mkdir(exist_ok=True)

@@ -15,7 +15,6 @@ def run_preview(
     stop_event = threading.Event()
     with (
         patch('preview.create_stop_event', return_value=stop_event),
-        patch('preview.set_stop_event_on_signal', side_effect=lambda _x: None),
     ):
         thread = threading.Thread(
             target=preview.run_preview,
