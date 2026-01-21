@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>{% block title %}{% endblock title %} | {{ SITE_NAME }}</title>
+  {% block favicon %}
+    {% if INCLUDE_DEFAULT_FAVICON %}
+      <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" sizes="any" type="image/svg+xml">
+    {% endif %}
+  {% endblock favicon %}
+  {% block meta_tags %}
+    {% if SITE_NAME %}
+      <meta property="og:site_name" content="{{ SITE_NAME }}">
+    {% endif %}
+    {# Facebook specific Tags #}
+    {% if FACEBOOK_APP_ID %}
+      <meta property="fb:app_id" content="{{ FACEBOOK_APP_ID }}">
+    {% endif %}
+    {% if SITE_FACEBOOK %}
+      <meta property="article:publisher" content="{{ SITE_FACEBOOK }}">
+    {% endif %}
+
+    {% if SITE_TWITTER %}
+      <meta name="twitter.card" content="summary">
+      <meta name="twitter:site" content="{{ SITE_TWITTER }}">
+    {% endif %}
+  {% endblock meta_tags %}
+  {% block styles %}
+    {% if INCLUDE_CSS %}
+      <link href="{{ url_for('static', filename='combined.min.css') }}" rel="stylesheet" type="text/css">
+    {% endif %}
+    <link href="{{ url_for('main.pygments_css') }}" rel="stylesheet">
+  {% endblock styles %}
+  <link href="{{ url_for('posts.feed') }}" rel="alternate" title="{{ SITE_NAME }}" type="application/atom+xml">
+</head>
+<body>
+  <div id="fullpage">
+    <header>
+      <nav role="navigation">
+        <ul>
+          {% block menu %}
+          <li {{ 'class=active' if active == 'home' }}><a href="{{ url_for('main.index') }}">Home</a></li>
+          <li {{ 'class=active' if active == 'posts' }}><a href="{{ url_for('posts.all_posts') }}">Posts</a></li>
+          <li {{ 'class=active' if active == 'tags' }}><a href="{{ url_for('posts.all_tags') }}">Tags</a></li>
+          <li {{ 'class=active' if active == 'about' }}><a href="{{ url_for('pages.page', path='about') }}">About</a></li>
+          {% endblock menu %}
+        </ul>
+      </nav>
+    </header>
+
+    {% block content %}
+    {% endblock content %}
+
+    <footer>
+      {% block footer %}
+      <ul>
+        <li><a href="mailto:email@example.com">email@example.com</a></li>
+        <li><a href="https://github.com/" target="_blank">GitHub Profile</a></li>
+        <li><a href="https://bitbucket.org/" target="_blank">BitBucket Profile</a></li>
+      </ul>
+      {% endblock footer %}
+    </footer>
+  </div>
+  {% block scripts %}
+    {% if INCLUDE_JS %}
+      <script src="{{ url_for('static', filename='combined.min.js') }}"></script>
+    {% endif %}
+    {% if PREVIEW %}
+      <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const sse = new EventSource('/changes');
+          sse.onmessage = (event) => {
+            location.reload();
+          }
+        });
+      </script>
+    {% endif %}
+  {% endblock scripts %}
+</body>
+</html>

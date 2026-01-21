@@ -1,0 +1,102 @@
+{% extends "_layout.html" %}
+
+{% block title %}
+  {% if not encrypted_title %}
+    {{ post.title }}
+  {% endif %}
+{% endblock title %}
+
+{% block meta_tags %}
+  {{ super() }}
+  {% if post.description %}
+    <meta name="description" content="{{ post.description }}">
+  {% endif %}
+  {% if post.tags %}
+    <meta name="keywords" content="{{ post.tags }}">
+  {% endif %}
+
+  {# Open Graph Tags #}
+  <meta property="og:type" content="article">
+  {% if 'draft' not in post.meta %}
+    <meta property="og:url" content="{{ url_for('posts.post', year=post.meta['published'].year, month=post.meta['published'].strftime('%m'), day=post.meta['published'].strftime('%d'), path=post.path, _external=True) }}">
+  {% endif %}
+  {% if not encrypted_title %}
+    <meta property="og:title" content="{{ post.title }}">
+  {% endif %}
+  <meta property="og:description" content="{{ post.description }}">
+  {% if post.image or SITE_LOGO %}
+    <meta property="og:image" content="{{ url_for('static', filename=post.image or SITE_LOGO, _external=True) }}">
+  {% endif %}
+
+  {% if post.facebook_url or DEFAULT_AUTHOR_FACEBOOK %}
+    <meta property="article:author" content="{{ post.facebook_url or DEFAULT_AUTHOR_FACEBOOK }}">
+  {% endif %}
+
+  {# Twitter Specific Tags #}
+  {% if post.twitter_username or DEFAULT_AUTHOR_TWITTER %}
+    <meta name="twitter:creator" content="{{ post.twitter_username or DEFAULT_AUTHOR_TWITTER }}">
+  {% endif %}
+{% endblock meta_tags %}
+
+{% block content %}
+  {# TODO: use post.image #}
+  <article>
+    <h1>
+      {% if encrypted_title %}
+        <span id="post-title"></span>
+      {% else %}
+        {{ post.title }}
+      {% endif %}
+    </h1>
+    {% if post.subtitle %}
+      <h2 class="subheading">
+        {% if encrypted_subtitle %}
+          <span id="post-subtitle"></span>
+        {% else %}
+          {{ post.subtitle }}
+        {% endif %}
+      </h2>
+    {% endif %}
+    {% if SHOW_AUTHOR or post.published -%}
+      <span class="meta">
+        Posted
+        {%- if SHOW_AUTHOR -%}
+          {{ " " }}by <a href="{{ url_for('posts.author', author = post.author or DEFAULT_AUTHOR) }}">{{ post.author or DEFAULT_AUTHOR }}</a>
+        {%- endif -%}
+        {%- if post.published -%}
+          {{ " " }}on {{ post.published.strftime('%Y-%m-%d') }}
+        {%- endif %}
+      </span>
+    {% endif %}
+
+    {% if encrypted_content %}
+        <div id="post-content"></div>
+    {% else %}
+      {{ post.html|safe }}
+    {% endif %}
+
+    <hr class="small">
+    {% if post.tags %}
+      <p><strong>Tags</strong></p>
+      {% for tag in post.meta.get('tags') %}
+        <a class="tag" href="{{ url_for('posts.tag', tag=tag) }}">{{ tag }}</a>
+      {% endfor %}
+    {% endif %}
+  </article>
+{% endblock content %}
+
+{% block scripts %}
+  {{ super() }}
+  {% if encrypted_content %}
+    <script src="{{ url_for('static', filename='password-protect.js') }}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", async function() {
+        const cipherHTML = "{{ encrypted_content }}";
+        const cipherTitle = "{{ encrypted_title }}";
+        const cipherSubtitle = "{{ encrypted_subtitle }}";
+        const password = prompt("Enter a value:");
+        await decryptPost(password, cipherHTML, cipherTitle, cipherSubtitle);
+      });
+    </script>
+  {% endif %}
+{% endblock scripts %}
