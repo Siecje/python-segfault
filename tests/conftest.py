@@ -12,25 +12,21 @@ def copy_file(source: Path, destination: Path) -> None:
         shutil.copyfile(source, destination)
 
 
-def copy_site_file(directory: Path, filename: str) -> None:
-    anchor = f'htmd.example_site.{directory}'
-    source_path = files(anchor) / filename
-    destination_path = directory / filename
+def initialize_site(tmp_dir) -> None:
+    """Create example files to get started."""
+    dir_posts = Path(tmp_dir) / 'posts/'
+    dir_posts.mkdir()
+    anchor = f'htmd.example_site.posts'
+    source_path = files(anchor) / 'example.md'
+    destination_path = dir_posts / 'example.md'
 
     with as_file(source_path) as file:
         copy_file(file, destination_path)
 
 
-def initialize_site() -> None:
-    """Create example files to get started."""
-    dir_posts = Path('posts/')
-    dir_posts.mkdir()
-    copy_site_file(dir_posts, 'example.md')
-
-
 @pytest.fixture(scope='function')
 def run_start() -> Generator[CliRunner]:
     runner = CliRunner()
-    with runner.isolated_filesystem():
-        initialize_site()
+    with runner.isolated_filesystem() as tmp_dir:
+        initialize_site(tmp_dir)
         yield runner
