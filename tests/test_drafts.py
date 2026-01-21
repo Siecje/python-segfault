@@ -58,12 +58,9 @@ def run_preview(
         patch('preview.create_stop_event', return_value=stop_event),
         patch('preview.set_stop_event_on_signal', side_effect=lambda _x: None),
     ):
-        # We now call the function directly in a thread instead of using runner.invoke
-        # 'preview.preview' or 'preview.run_preview' depending on your naming
-        import preview 
         
         thread = threading.Thread(
-            target=preview.run_preview, # Use your refactored non-click function
+            target=preview.run_preview,
             kwargs={'host': host, 'port': port},
             daemon=True,
         )

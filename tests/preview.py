@@ -1,11 +1,8 @@
 import contextlib
-import os
 from pathlib import Path
 import signal
 import socket
-import sys
 import threading
-import time
 import types
 import argparse
 
@@ -152,16 +149,12 @@ def watch_disk(app, static_folder, posts_path, exit_event, refresh_event):
         with contextlib.suppress(Exception):
             observer.unschedule_all()
 
+
 def create_webserver(app, host, port):
     webserver = make_server(host, port, app)
     webserver.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     return webserver
 
-def exit_if_parent_pid_changes():
-    parent_pid = os.getppid()
-    while os.getppid() == parent_pid:
-        time.sleep(1)
-    os._exit(0)
 
 def run_preview(host: str, port: int) -> None:
     """The core logic previously inside the @click.command."""
@@ -195,14 +188,6 @@ def run_preview(host: str, port: int) -> None:
         daemon=True,
     )
 
-    ##
-    # -- Thread: Force exit if parent process changes
-    ##
-    parent_pid_thread = threading.Thread(
-        target=exit_if_parent_pid_changes,
-        daemon=True,
-    )
-
     app.jinja_env.globals['PREVIEW'] = True
     webserver = create_webserver(app, host, port)
     if port == 0:
@@ -215,7 +200,6 @@ def run_preview(host: str, port: int) -> None:
     try:
         watch_thread.start()
         webserver_thread.start()
-        parent_pid_thread.start()
 
         while not stop_event.is_set():
             if not webserver_thread.is_alive():
