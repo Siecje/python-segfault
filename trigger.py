@@ -1,33 +1,31 @@
 import contextlib
-import signal
-import socket
-import threading
-import types
-import argparse
-from pathlib import Path
+from contextlib import contextmanager
+import faulthandler
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
+import os
+from pathlib import Path
+import socket
+import shutil
+import threading
+import tempfile
+from unittest.mock import patch
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
+
+
+faulthandler.enable()
 
 
 def create_stop_event() -> threading.Event:
     return threading.Event()
 
 
-class PostsCreatedHandler(FileSystemEventHandler):
-    def handle_event(self, file_path: str | bytes) -> None:
-        pass
-    def on_created(self, event): self.handle_event(event.src_path)
-    def on_modified(self, event): self.handle_event(event.src_path)
-    def on_moved(self, event): self.handle_event(event.dest_path)
-
-
 def watch_disk(posts_path, exit_event):
     observer = Observer(timeout=0.2)
     observer.daemon = True
     try:
-        posts_handler = PostsCreatedHandler()
+        posts_handler = FileSystemEventHandler()
         observer.schedule(
             posts_handler,
             path=str(posts_path),
@@ -52,11 +50,8 @@ def create_webserver(host, port):
     return server
 
 
-def run_preview(host: str, port: int) -> None:
+def preview(host: str, port: int) -> None:
     stop_event = create_stop_event()
-    
-    # Ensure directory exists before watching
-    Path('posts').mkdir(exist_ok=True)
 
     watch_thread = threading.Thread(
         target=watch_disk,
@@ -76,7 +71,6 @@ def run_preview(host: str, port: int) -> None:
     try:
         watch_thread.start()
         webserver_thread.start()
-        print(f"Serving at http://{host}:{actual_port}")
 
         while not stop_event.is_set():
             if not webserver_thread.is_alive():
@@ -92,13 +86,42 @@ def run_preview(host: str, port: int) -> None:
         webserver.shutdown()
         webserver.server_close()
         stop_event.set()
-        print('Preview stopped.')
+
+
+def initialize_site(tmp_dir: Path) -> None:
+    source_dir = tmp_dir / 'source_assets'
+    source_dir.mkdir(exist_ok=True)
+    (source_dir / 'example.md').write_text("title: Example\n...", encoding="utf-8")
+    dir_posts = tmp_dir / 'posts'
+    dir_posts.mkdir(exist_ok=True)
+    shutil.copyfile(source_dir / 'example.md', dir_posts / 'example.md')
+
+
+@contextmanager
+def run_preview(host: str = "127.0.0.1", port: int = 0):
+    stop_event = threading.Event()
+    with patch('__main__.create_stop_event', return_value=stop_event):
+        thread = threading.Thread(target=preview, args=(host, port), daemon=True)
+        thread.start()
+        try:
+            yield
+        finally:
+            stop_event.set()
+            thread.join(timeout=2.0)
+
+
+def execute_once():
+    old_cwd = os.getcwd()
+    with tempfile.TemporaryDirectory() as tmp_dir_name:
+        tmp_path = Path(tmp_dir_name)
+        try:
+            initialize_site(tmp_path)
+            os.chdir(tmp_path)
+            with run_preview():
+                pass 
+        finally:
+            os.chdir(old_cwd)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Serve files to preview site.')
-    parser.add_argument('--host', '-h', default='::1', help='Location to access.')
-    parser.add_argument('--port', '-p', type=int, default=9090, help='Port.')
-    
-    args = parser.parse_args()
-    run_preview(args.host, args.port)
+    execute_once()
