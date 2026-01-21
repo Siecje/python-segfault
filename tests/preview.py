@@ -13,9 +13,14 @@ from watchdog.events import (
 from watchdog.observers import Observer
 from werkzeug.serving import make_server
 
-from utils import (
-    create_app,
-)
+
+from pathlib import Path
+from flask import Flask
+
+
+def create_app():
+    app = Flask(__name__)
+    return app
 
 
 def create_stop_event() -> threading.Event:
@@ -30,42 +35,20 @@ def set_stop_event_on_signal(stop_event: threading.Event) -> None:
 
 
 class PostsCreatedHandler(FileSystemEventHandler):
-    def __init__(self, app: Flask, event: threading.Event) -> None:
-        super().__init__()
-        self.app = app
-        self.event = event
-        self._seen_mtimes: dict[str, int] = {}
+    def handle_event(self, file_path: str | bytes) -> None:
+        pass
 
-    def handle_event(self, file_path: str | bytes, *, is_new_post: bool) -> None:
-        if isinstance(file_path, bytes):
-            file_path = file_path.decode('utf-8')
-        if not file_path.endswith('.md'):
-            return
-
-        try:
-            new_mtime = Path(file_path).stat().st_mtime_ns
-        except FileNotFoundError:
-            return
-
-        if self._seen_mtimes.get(file_path) == new_mtime:
-            return
-
-        self._seen_mtimes[file_path] = new_mtime
-        self.event.set()
-        action = 'created' if is_new_post else 'updated'
-        print(f'Post {action} {file_path}.')
-
-    def on_created(self, event): self.handle_event(event.src_path, is_new_post=True)
-    def on_modified(self, event): self.handle_event(event.src_path, is_new_post=False)
-    def on_moved(self, event): self.handle_event(event.dest_path, is_new_post=False)
+    def on_created(self, event): self.handle_event(event.src_path)
+    def on_modified(self, event): self.handle_event(event.src_path)
+    def on_moved(self, event): self.handle_event(event.dest_path)
 
 
 
-def watch_disk(app, static_folder, posts_path, exit_event, refresh_event):
+def watch_disk(posts_path, exit_event):
     observer = Observer(timeout=0.2)
     observer.daemon = True
     try:
-        posts_handler = PostsCreatedHandler(app, refresh_event)
+        posts_handler = PostsCreatedHandler()
         observer.schedule(
             posts_handler,
             path=str(posts_path),
@@ -96,23 +79,16 @@ def run_preview(host: str, port: int) -> None:
 
     stop_event = create_stop_event()
     set_stop_event_on_signal(stop_event)
-
-    refresh_event = threading.Event()
-    app.config['refresh_event'] = refresh_event
     
     watch_thread = threading.Thread(
         target=watch_disk,
         args=(
-            app,
-            app.static_folder,
-            app.config['FLATPAGES_ROOT'],
+            Path('posts'),
             stop_event,
-            refresh_event,
         ),
         daemon=True,
     )
 
-    app.jinja_env.globals['PREVIEW'] = True
     webserver = create_webserver(app, host, port)
     if port == 0:
         port = webserver.server_port
