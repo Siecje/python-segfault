@@ -74,7 +74,6 @@ def create_webserver(app, host, port):
 
 
 def run_preview(host: str, port: int) -> None:
-    """The core logic previously inside the @click.command."""
     app = create_app()
 
     stop_event = create_stop_event()

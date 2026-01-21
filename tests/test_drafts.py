@@ -4,7 +4,6 @@ import socket
 import threading
 from unittest.mock import patch
 
-from click.testing import CliRunner
 from flask import Flask
 from werkzeug.serving import BaseWSGIServer, make_server
 
@@ -73,6 +72,6 @@ def run_preview(
             thread.join(timeout=2.0)
 
 
-def test_draft_build_preview(run_start: CliRunner) -> None:
+def test_draft_build_preview(run_start) -> None:
     with run_preview():
         pass

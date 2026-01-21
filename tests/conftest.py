@@ -1,9 +1,9 @@
-from importlib.resources import as_file, files
 from collections.abc import Generator
+from importlib.resources import as_file, files
+import os
 from pathlib import Path
 import shutil
 
-from click.testing import CliRunner
 import pytest
 
 
@@ -25,8 +25,22 @@ def initialize_site(tmp_dir) -> None:
 
 
 @pytest.fixture(scope='function')
-def run_start() -> Generator[CliRunner]:
-    runner = CliRunner()
-    with runner.isolated_filesystem() as tmp_dir:
-        initialize_site(tmp_dir)
-        yield runner
+def run_start(tmp_path: Path) -> Generator[Path, None, None]:
+    """
+    Replaces isolated_filesystem with pytest's tmp_path.
+    Yields the Path object to the temporary directory.
+    """
+    # Capture old CWD to restore it later
+    old_cwd = Path.cwd()
+    
+    # Initialize the site structure in the temp path
+    initialize_site(tmp_path)
+    
+    # Change directory to the temp path (mimicking isolated_filesystem)
+    os.chdir(tmp_path)
+    
+    try:
+        yield tmp_path
+    finally:
+        # Always return to the original directory
+        os.chdir(old_cwd)
