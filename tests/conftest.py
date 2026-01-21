@@ -1,48 +1,51 @@
-from collections.abc import Generator
-from importlib.resources import as_file, files
 import os
-from pathlib import Path
 import shutil
-
 import pytest
+from collections.abc import Generator
+from pathlib import Path
 
 
 def copy_file(source: Path, destination: Path) -> None:
+    """Standard copy wrapper."""
     try:
         shutil.copyfile(source, destination)
     except FileExistsError:
         pass
 
 
-def initialize_site(tmp_dir) -> None:
-    """Create example files to get started."""
-    dir_posts = Path(tmp_dir) / 'posts/'
-    dir_posts.mkdir()
-    anchor = f'htmd.example_site.posts'
-    source_path = files(anchor) / 'example.md'
-    destination_path = dir_posts / 'example.md'
+def initialize_site(tmp_dir: Path) -> None:
+    """Create a file from scratch and then copy it."""
+    # 1. Create a 'source' file in the temp directory
+    source_dir = tmp_dir / 'source_assets'
+    source_dir.mkdir(exist_ok=True)
+    source_file = source_dir / 'example.md'
+    
+    source_file.write_text("""---
+title: Example Post
+author: Taylor
+published: 2014-10-30
+tags: [first]
+...
+This is the post **text**.""", encoding="utf-8")
 
-    with as_file(source_path) as file:
-        copy_file(file, destination_path)
+    # 2. Setup the destination
+    dir_posts = tmp_dir / 'posts'
+    dir_posts.mkdir(exist_ok=True)
+    destination_file = dir_posts / 'example.md'
+
+    # 3. Perform the copy using your function
+    copy_file(source_file, destination_file)
 
 
 @pytest.fixture(scope='function')
 def run_start(tmp_path: Path) -> Generator[Path, None, None]:
-    """
-    Replaces isolated_filesystem with pytest's tmp_path.
-    Yields the Path object to the temporary directory.
-    """
-    # Capture old CWD to restore it later
+    """Isolated filesystem setup."""
     old_cwd = Path.cwd()
     
-    # Initialize the site structure in the temp path
     initialize_site(tmp_path)
     
-    # Change directory to the temp path (mimicking isolated_filesystem)
     os.chdir(tmp_path)
-    
     try:
         yield tmp_path
     finally:
-        # Always return to the original directory
         os.chdir(old_cwd)
