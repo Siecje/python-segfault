@@ -9,10 +9,8 @@ import uuid
 
 
 import click
-from csscompressor import compress
 from flask import Flask
 from flask_flatpages import FlatPages, Page
-from jsmin import jsmin
 
 
 def copy_file(source: Path, destination: Path) -> None:
@@ -102,79 +100,6 @@ def atomic_write(path: Path, content: str) -> None:
 
 def send_stderr(message: str) -> None:
     click.echo(click.style(message, fg='red'), err=True)
-
-def combine_and_minify_css(static_folder: Path) -> bool:
-    # Combine and minify all .css files in the static folder
-    try:
-        css_files = sorted([
-            f for f in static_folder.iterdir()
-            if f.name.endswith('.css') and f.name != 'combined.min.css'
-        ])
-    except FileNotFoundError:
-        # static folder does not exist
-        return False
-
-    if not css_files:
-        # There are no .css files in the static folder
-        return False
-
-    # combine all .css files into one string
-    file_contents = []
-    for f in css_files:
-        with f.open('r') as css_file:
-            file_contents.append(css_file.read())
-    combined_str = '\n'.join(file_contents)
-
-    dst_path = static_folder / 'combined.min.css'
-
-    try:
-        current_combined = dst_path.read_text()
-    except FileNotFoundError:
-        current_combined = ''
-
-    new_combined = compress(combined_str)
-    if new_combined == current_combined:
-        return False
-
-    atomic_write(dst_path, new_combined)
-    return True
-
-
-def combine_and_minify_js(static_folder: Path) -> bool:
-    # Combine and minify all .js files in the static folder
-    try:
-        js_files = sorted([
-            f for f in static_folder.iterdir()
-            if f.name.endswith('.js')
-            and f.name != 'combined.min.js'
-        ])
-    except FileNotFoundError:
-        # static folder does not exist
-        return False
-
-    if not js_files:
-        # There are no .js files in the static folder
-        return False
-
-    # combine all .js files into one string
-    file_contents = []
-    for f in js_files:
-        with f.open('r') as js_file:
-            file_contents.append(js_file.read())
-    combined_str = '\n'.join(file_contents)
-
-    dst_path = static_folder / 'combined.min.js'
-    try:
-        current_combined = dst_path.read_text()
-    except FileNotFoundError:
-        current_combined = ''
-
-    new_combined = jsmin(combined_str)
-    if new_combined == current_combined:
-        return False
-
-    atomic_write(dst_path, new_combined)
-    return True
 
 
 def validate_post(post: Page, required_fields: list[str]) -> bool: # noqa: C901
